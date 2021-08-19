@@ -9,17 +9,17 @@ The file <code>makefile.defs</code> contains definitions that may be specific fo
 
 | Variable | Description |
 | -------- | ------- |
-| LOG4J_URL | Points to the JAR file that implements LOG4J |
-| COMMONS_URL |  |
-| CORS_URL |  |
-| PROP_UTILS_URL |  |
-| XOM_URL |  |
-| JSTL_URL |  |
-| SERVLET_URL |  |
+| <code>LOG4J_URL</code> | Points to the JAR file that implements LOG4J |
+| <code>COMMONS_URL</code> |  |
+| <code>CORS_URL</code> |  |
+| <code>PROP_UTILS_URL</code> |  |
+| <code>XOM_URL</code> |  |
+| <code>JSTL_URL</code> |  |
+| <code>SERVLET_URL</code> |  |
 
 ## Home directories of standard tools
 
 | Directory | Tool description |
 | -------- | ------- |
-| JAVA_HOME | Main root of the Java SDK tools |
-| ANT_HOME | Main root of Jakarta ANT |
+| <code>JAVA_HOME</code> | Main root of the Java SDK tools |
+| <code>ANT_HOME</code> | Main root of Jakarta <code>ant</code>. <code>Ant</code> is used to create the JAR artifacts ot the repo. |
