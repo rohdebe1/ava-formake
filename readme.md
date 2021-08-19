@@ -6,3 +6,7 @@ for the running platform.
 A number of files contain definitions that may be specific for the respective platform:
 
 ## <code>makefile.defs</code>
+
+| Variable | Meaning |
+| -------- | ------- |
+| LOG4J_URL | Points to the JAR file that implements LOG4J |
