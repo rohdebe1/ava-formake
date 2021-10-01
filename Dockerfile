@@ -54,4 +54,6 @@ ADD sample.war /usr/local/tomcat/webapps/
 
 EXPOSE 8080
 CMD ["catalina.sh", "run"]
+
+# Enable this debugging entry if you need to inspect the running container
 # CMD ["sh"]
