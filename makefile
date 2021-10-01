@@ -48,7 +48,7 @@ else
 		JDK_MACHINE_INCLUDE ?= ${JAVA_HOME}/include/darwin
 	    MACHINE_DIR := darwin
 	else
-	    STATIC_LIB_FLAGS := -static -libgcc
+	    STATIC_LIB_FLAGS := -static-libgcc
 	    DETECTED_OS := Linux
 		JDK_MACHINE_INCLUDE ?= ${JAVA_HOME}/include/linux
 	    MACHINE_DIR := linux
@@ -58,6 +58,7 @@ else
         RM = rm -f
         FixPath = $1
     endif
+    ANT_HOME := /usr
     EXE := 
     OBJ_EXT := o
 	SHARED_LIB_EXT := so
@@ -133,11 +134,10 @@ RDKIT_OBJECTS := \
 	${BUILDDIR}/reaccsio.${OBJ_EXT} \
 	${BUILDDIR}/hashcode.${OBJ_EXT}
 
+# Build all targets that create artifacts. There are two further targets for Docker to
+# start the depicter service directly. Note: The Docker system needs to be on the PATH
+# for these additional targets to work.
 all:	clean variables download programs javaclasses archives jni_libraries tomcat_lib
-#
-hello : ${WINDIR}/hello.c
-	$(CC) --verbose -c -o ${WINDIR}/hello.obj ${WINDIR}/hello.c
-	$(CC) -o ${EXETARGETS}/hello.exe -mwindows ${WINDIR}/hello.obj
 #
 ifdef OS
 readme :
@@ -208,7 +208,15 @@ tomcat_lib : archives ${LIBTARGETS}/${LIB_PREFIX}JNIDepict.${SHARED_LIB_EXT} ${L
 	cp ${LIBTARGETS}/avalon_jni_JNISmi2Mol.${SHARED_LIB_EXT} $(TARGETDIR)/tomcat_lib
 	# make sure Linux systems also find the file
 	cp ${LIBTARGETS}/avalon_jni_JNISmi2Mol.${SHARED_LIB_EXT} $(TARGETDIR)/tomcat_lib/${LIB_PREFIX}JNISmi2Mol.${SHARED_LIB_EXT}
-	
+#
+# Build the Docker image to be run by the tomcat_run target
+tomcat_build : tomcat_lib
+	docker build -f Dockerfile -t depicter:1.0.0 .
+#
+# Run the Tomcat Docker image serving depicter on the host's port 80
+# The image is run detached, which means the Docker system needs to be used to stop it.
+tomcat_run : tomcat_build
+	docker run --rm -d --publish 80:8080 depicter:1.0.0
 #
 download :
 	test -f ${LIBDIR}/log4j-1.2.8.jar || curl -o ${LIBDIR}/log4j-1.2.8.jar ${LOG4J_URL}
