@@ -19,7 +19,10 @@ The file <code>makefile.defs</code> contains definitions that may be specific fo
 
 ## Home directories of standard tools
 
+These variable should normally be set and exported already by build environment. The <code>makefile.defs</code> file contains example settings
+if the environment doesn't provide it.
+
 | Directory | Tool description |
 | -------- | ------- |
 | <code>JAVA_HOME</code> | Main root of the Java SDK tools |
-| <code>ANT_HOME</code> | Main root of Jakarta <code>ant</code>. <code>Ant</code> is used to create the JAR artifacts ot the repo. |
+| <code>ANT_HOME</code> | Main root of Jakarta <code>Ant</code>. <code>Ant</code> is used to create the JAR artifacts ot the repo. |
