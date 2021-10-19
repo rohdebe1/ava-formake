@@ -1,12 +1,10 @@
-# FROM tomcat:latest
-FROM tomcat:9.0
+# FROM tomcat:9.0
+FROM tomcat:9.0.54-jdk11-openjdk
 LABEL maintainer="rohdebe1@gmail.com"
 
 RUN apt-get -y update && apt-get install -y
 
 RUN apt-get -y install build-essential
-
-# RUN apt-get -y install openjdk-11-jdk
 
 RUN apt-get -y install ant
 
@@ -16,16 +14,16 @@ RUN apt -y install curl
 # RUN  echo deb http://deb.debian.org/debian sid main >>/etc/apt/sources.list
 
 # Fix certificate issues
-RUN apt-get update && \
-    apt-get install ca-certificates-java && \
-    apt-get clean && \
-    update-ca-certificates -f;
+# RUN apt-get update && \
+#     apt-get install ca-certificates-java && \
+#     apt-get clean && \
+#     update-ca-certificates -f;
 
-# Install OpenJDK-8
-RUN apt-get update && \
-    apt-get install -y openjdk-11-jdk && \
-    apt-get install -y ant && \
-    apt-get clean;
+# Install OpenJDK-11
+# RUN apt-get update && \
+#     apt-get install -y openjdk-11-jdk && \
+#     apt-get install -y ant && \
+#     apt-get clean;
 
 # Setup JAVA_HOME -- useful for docker commandline
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
