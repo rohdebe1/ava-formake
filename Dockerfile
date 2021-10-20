@@ -1,5 +1,5 @@
-# FROM tomcat:9.0
-FROM tomcat:9.0.54-jdk11-openjdk
+FROM tomcat:9.0
+# FROM tomcat:9.0.54-jdk11-openjdk
 LABEL maintainer="rohdebe1@gmail.com"
 
 RUN apt-get -y update && apt-get install -y
@@ -14,16 +14,16 @@ RUN apt -y install curl
 # RUN  echo deb http://deb.debian.org/debian sid main >>/etc/apt/sources.list
 
 # Fix certificate issues
-# RUN apt-get update && \
-#     apt-get install ca-certificates-java && \
-#     apt-get clean && \
-#     update-ca-certificates -f;
+RUN apt-get update && \
+    apt-get install ca-certificates-java && \
+    apt-get clean && \
+    update-ca-certificates -f;
 
 # Install OpenJDK-11
-# RUN apt-get update && \
-#     apt-get install -y openjdk-11-jdk && \
-#     apt-get install -y ant && \
-#     apt-get clean;
+RUN apt-get update && \
+    apt-get install -y openjdk-11-jdk && \
+    apt-get install -y ant && \
+    apt-get clean;
 
 # Setup JAVA_HOME -- useful for docker commandline
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
@@ -48,7 +48,7 @@ RUN cp lib/servlet-api-2.4.jar /usr/local/tomcat/lib
 RUN cp target/tomcat_lib/*.* /usr/local/tomcat/lib
 RUN cp target/archives/*.war /usr/local/tomcat/webapps
 
-ADD sample.war /usr/local/tomcat/webapps/
+# ADD sample.war /usr/local/tomcat/webapps/
 
 EXPOSE 8080
 CMD ["catalina.sh", "run"]
