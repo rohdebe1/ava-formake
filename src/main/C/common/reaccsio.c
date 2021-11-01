@@ -1419,15 +1419,6 @@ struct reaccs_molecule_t * MolStr2Mol(char * MolStr)
    return mp;
 }
 
-#define NTMPVARS 4
-static char *tmpvars[] =
-{
-    "TMP",
-    "TMPDIR",
-    "TEMP",
-    "TEMPDIR"
-};
-
 char * MolToMolStr(struct reaccs_molecule_t * mp)
 /*
  * Convert a molecule struct to a char * MolFile
@@ -1443,27 +1434,7 @@ char * MolToMolStr(struct reaccs_molecule_t * mp)
    char * MolStr;
 
    tempfile = NULL;
-   if ((fp = tmpfile()) == NULL)
-   {
-      /* Try directories found in various temp dir environment variables */
-      for (idir=0; idir<NTMPVARS; idir++)
-      {
-         if (IsNULL(fp))
-         {
-            tempdir = getenv(tmpvars[idir]);
-            if (!IsNULL(tempdir))
-            {
-               tempfile = tempnam(tempdir, (const char *)NULL);
-               fp = fopen(tempfile, "wb+");
-               if (IsNULL(fp))
-               {
-                   MyFree((char *)tempfile);
-                   tempfile = NULL;
-               }
-            }
-         }
-      }
-   }
+   fp = tmpfile();
    /* File could not be created => log an error and return NULL */
    if (IsNULL(fp))
    {

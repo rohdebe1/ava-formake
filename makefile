@@ -10,7 +10,6 @@ ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
     FixPath = $(subst /,\,$1)	# replace slashes by backslashes. Might not be needed.
     DETECTED_OS := Windows
     # If path to javah is non-empty then it's safe to use it
-    JAVAH_PATH := $(realpath ${JAVA_HOME}/bin/javah.exe)
 	ifneq ($(realpath ${JAVA_HOME}/bin/javah.exe),) 
 		JAVAH := TRUE
 	endif
@@ -39,7 +38,6 @@ ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
 	INCLUDEDIRS := ${SRCDIR}/C/include/
 else 
     DETECTED_OS := $(shell sh -c 'uname 2>/dev/null || echo Unknown')
-    JAVAH_PATH := $(realpath ${JAVA_HOME}/bin/javah)
     # If path to javah is non-empty then it's safe to use it
 	ifneq ($(realpath ${JAVA_HOME}/bin/javah),) 
 		JAVAH := TRUE
@@ -58,7 +56,7 @@ else
         RM = rm -f
         FixPath = $1
     endif
-    ANT_HOME := /usr
+    ANT_HOME ?= /usr
     EXE := 
     OBJ_EXT := o
 	SHARED_LIB_EXT := so
@@ -173,7 +171,9 @@ variables: readme
 	echo WINDIR=${WINDIR}
 	echo DETECTED_OS=${DETECTED_OS}
 	echo JAVAH=${JAVAH}
-	echo JAVAH_PATH=${JAVAH_PATH}
+	echo 0: `which javac.exe`
+	$(eval JAVAC=$(shell which javac.exe))
+	echo 1: JAVAC=${JAVAC}
 
 programs: ${PROGRAMS} ${LIBTARGETS}/avalon4rdkit.${STATIC_LIB_EXT} ${LIBTARGETS}/avalon_tools.${STATIC_LIB_EXT}
 #
