@@ -947,10 +947,16 @@ void ClearParameters()
    print_versions = FALSE;
    result_as_data = FALSE;
 // fprintf(stderr,"ClearParameters(3)\n");
-   if (!IsNULL(bad_file)) fclose(bad_file); bad_file = (FILE *)NULL;
+   if (!IsNULL(bad_file))
+	   fclose(bad_file);
+   bad_file = (FILE *)NULL;
    remove_bad_mols = FALSE;
-   if (!IsNULL(stereo_file)) fclose(stereo_file); stereo_file = (FILE *)NULL;
-   if (!IsNULL(profile)) fclose(profile); profile = (FILE *)NULL;
+   if (!IsNULL(stereo_file))
+	   fclose(stereo_file);
+   stereo_file = (FILE *)NULL;
+   if (!IsNULL(profile))
+	   fclose(profile);
+   profile = (FILE *)NULL;
 // fprintf(stderr,"ClearParameters(4)\n");
    profile_name = NULL;
    if (!IsNULL(trans_pairs))
