@@ -549,7 +549,7 @@ struct prop_line_t * ReadProperties(Fortran_FILE *fp,
             ShowMessageI("nentries = %d","ReadProperties", nentries);
             ShowMessageS("buffer = '%s'","ReadProperties",fp->buffer);
          }
-         /* Just handle mass difference for substitution point labels and some well-known other atoms */
+         /* Just handle mass difference for substitution point labels and some well-known other atoms, other labelings are captured as property lines */
          for (n=0; n<nentries; n++)
             if (0 == strcmp(mp->atom_array[tmp_ats[n]-1].atom_symbol, "R"))
                mp->atom_array[tmp_ats[n]-1].mass_difference = tmp_vals[n];
@@ -581,6 +581,12 @@ struct prop_line_t * ReadProperties(Fortran_FILE *fp,
                mp->atom_array[tmp_ats[n]-1].mass_difference = tmp_vals[n]-89;
             else if (0 == strcmp(mp->atom_array[tmp_ats[n]-1].atom_symbol, "I")  &&  123 <= tmp_vals[n]  &&  tmp_vals[n] <= 131)
                mp->atom_array[tmp_ats[n]-1].mass_difference = tmp_vals[n]-127;
+            else { // make sure unknown isotopic labelings get represented as properties
+                hp = TypeAlloc(1,struct prop_line_t);
+                sprintf(hp->text, "M  ISO  1 %3d %3d", tmp_ats[n], tmp_vals[n]);
+                hp->text[MDL_MAXLINE] = '\0';
+                hp->next = result; result = hp;
+            }
       }
       else if (STRING_BEGINS(fp->buffer,"M  ALS"))      /* atom type lists */
       {
