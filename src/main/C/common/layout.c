@@ -2808,7 +2808,7 @@ void LayoutBondStereo(struct reaccs_molecule_t *mp,
              bp->stereo_symbol = NONE;
              pdb1_new[0] =  mp->atom_array[ai1].x; pdb1_new[1] =  mp->atom_array[ai1].y;
              pdb2_new[0] =  mp->atom_array[ai2].x; pdb2_new[1] =  mp->atom_array[ai2].y;
-             lastq = abs(q);
+             lastq = fabs(q);
              // continue;
           }
           // set up rotation
@@ -2830,7 +2830,7 @@ void LayoutBondStereo(struct reaccs_molecule_t *mp,
               ((bp->stereo_symbol & CIS_MASK)    &&  q > 0))
           {				/* double bond is OK */
 // fprintf(stderr, "3: CIS_TRANS_SWAPPED bond %d-%d: q = %g, ring_size = %d\n", bp->atoms[0], bp->atoms[1], q, ring_size[i]);
-             if (bp->stereo_symbol != NONE  &&  lastq < abs(q))
+             if (bp->stereo_symbol != NONE  &&  lastq < fabs(q))
              {
                  pdb1_new[0] =  mp->atom_array[ai1].x; pdb1_new[1] =  mp->atom_array[ai1].y;
                  pdb2_new[0] =  mp->atom_array[ai2].x; pdb2_new[1] =  mp->atom_array[ai2].y;
@@ -3542,7 +3542,7 @@ double TopBottomSeparation(struct reaccs_molecule_t *mp, int fragment_color, int
    MyFree((char *)numbers);
    MyFree((char *)edges);
    MyFree((char *)coords);
-   return abs(total) * dmax;
+   return fabs(total) * dmax;
 }
 
 double AttachmentCenterDistance(struct reaccs_molecule_t *mp, int color, int attachment_color)

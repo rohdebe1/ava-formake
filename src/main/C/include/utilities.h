@@ -560,7 +560,7 @@ int FloodWithColor(struct reaccs_molecule_t *mp,
  * It returns the number of atoms recolored during the process.
  */
 
-int StripColoredPart(struct reaccs_molecule_t *mp, int color);
+void StripColoredPart(struct reaccs_molecule_t *mp, int color);
 /*
  * Removes all atoms and adjacent bonds from *mp that are colored with color.
  */

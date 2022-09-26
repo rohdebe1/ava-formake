@@ -88,8 +88,10 @@ int IsMember(bit_set_t *set, unsigned member)
 {
    int result;
 
-   if (set == (bit_set_t *)NULL)
+   if (set == (bit_set_t *)NULL) {
       ShowMessage("globbered set pointer", "IsMember");
+      return (FALSE);
+   }
    else if (set->max_member < member  ||  set->bit_array[member/BASE_BITS] == 0)
       return (FALSE);
    else
