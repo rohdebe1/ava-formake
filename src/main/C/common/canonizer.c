@@ -505,7 +505,7 @@ next_cycle:
    for (i=0; i<mp->n_atoms; i++)
    {
       if (nbp[i].n_ligands < 3  ||  nbp[i].n_ligands > 4) continue;
-      /* Check if two ligands have same renumbering */
+      /* Check if two non-ring ligands have same renumbering */
       nequal = 0;
       nrb = 0;
       for (j=0; j<nbp[i].n_ligands; j++)
@@ -514,8 +514,9 @@ next_cycle:
          if (pre_num[nbp[i].atoms[j-1]] == pre_num[nbp[i].atoms[j]])
             nequal++;
 // fprintf(stderr,"%d: nrb=%d, nequal=%d\n", i+1, nrb, nequal);
-      if (nequal == 0) continue;          /* resolved => no change */
-      if (nrb > 2  &&  nrb-nequal > 1) continue; /* keep spiro/fusion centers */
+      if (nequal == 0) continue;                                              /* resolved => no change */
+      if (nrb > 2  &&  nrb-nequal > 1) continue;                              /* keep spiro/fusion centers */
+      if (nbp[i].n_ligands == 3  &&  nrb == 2  &&  nrb-nequal == 1) continue; /* keep stereo centers with two ring and one non-ring ligands */
       for (j=0; j<nbp[i].n_ligands; j++)
       {
          bp = &mp->bond_array[nbp[i].bonds[j]];

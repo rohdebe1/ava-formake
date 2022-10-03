@@ -1,4 +1,5 @@
 SRCDIR := src/main
+TESTDIR := src/test
 
 JDK_INCLUDE ?= ${JAVA_HOME}/include
 
@@ -87,7 +88,7 @@ JNIINCDIR := ${BUILDDIR}/jni_include
 
 SMI2MOL_TARGETS := ${EXETARGETS}/smi2mol${EXE} ${EXETARGETS}/smi2rdf${EXE} ${EXETARGETS}/sma2mol${EXE} ${EXETARGETS}/mol2smi${EXE} ${EXETARGETS}/mol2sma${EXE} ${EXETARGETS}/mol2tbl${EXE}
 #
-PROGRAMS := ${EXETARGETS}/struchk${EXE} ${EXETARGETS}/canonizer${EXE} ${EXETARGETS}/matchtest${EXE} ${EXETARGETS}/smi2mol${EXE} ${SMI2MOL_TARGETS}
+PROGRAMS := ${EXETARGETS}/struchk${EXE} ${EXETARGETS}/canonizer${EXE} ${EXETARGETS}/matchtest${EXE} ${EXETARGETS}/test.exe ${SMI2MOL_TARGETS}
 
 COMMON_OBJECTS := \
 	${BUILDDIR}/forio.${OBJ_EXT} \
@@ -176,6 +177,10 @@ variables: readme
 	echo 1: JAVAC=${JAVAC}
 
 programs: ${PROGRAMS} ${LIBTARGETS}/avalon4rdkit.${STATIC_LIB_EXT} ${LIBTARGETS}/avalon_tools.${STATIC_LIB_EXT}
+
+run_tests: programs
+	${EXETARGETS}/canonizer${EXE} <${TESTDIR}/resources/canonizer.in >canonizer.out
+	diff -Z ${TESTDIR}/resources/canonizer.out canonizer.out
 #
 ifdef JAVAH
 javastubs : javastubs_javah
@@ -349,7 +354,7 @@ ${EXETARGETS}/mol2smi${EXE} : ${PRGSRCDIR}/smi2mol_main.c ${COMMON_OBJECTS} ${SM
 ${EXETARGETS}/test.exe: ${BUILDDIR}/test.obj
 	${CC} -o ${EXETARGETS}/test.exe ${BUILDDIR}/test.obj
 #
-${BUILDDIR}/test.obj:	${SRCDIR}/test.c
+${BUILDDIR}/test.obj:	${TESTDIR}/C/test.c
 	${CC} -c -o $@ $<
 
 # Individual object files
