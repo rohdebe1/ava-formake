@@ -31,20 +31,22 @@
 //                                                                      */
 //            2.0.0   22-Feb-93       Changed user interface to         */
 //                                    multiple letter options.          */
-//								        */
-//	     2.2.1   23-Apr-98        Prepared for Oracle call-outs     */
+//								                                        */
+//	     2.2.1   23-Apr-98        Prepared for Oracle call-outs         */
 //                                                                      */
-//	     2.2.2   20-Jan-10        Fixed an error message            */
+//	     2.2.2   20-Jan-10        Fixed an error message                */
 //                                                                      */
-//	     2.2.3   07-Jan-14        Allow quoted options in profile   */
+//	     2.2.3   07-Jan-14        Allow quoted options in profile       */
 //                                    Ignore more Sgroup lines on read  */
 //                                                                      */
-//	     2.2.4   12-Feb-14        Implemented option for tautomer   */
+//	     2.2.4   12-Feb-14        Implemented option for tautomer       */
 //                                    standardization.                  */
+//                                                                      */
+//	     2.2.5   04-May-22        Fixed reading of isotopic labels      */
 //                                                                      */
 /************************************************************************/
 
-static char struchk_version[] = "2.2.4";
+static char struchk_version[] = "2.2.5";
 
 #ifdef __TURBOC__
 #include <process.h>
@@ -980,9 +982,11 @@ void ClearParameters()
    }
 // fprintf(stderr,"ClearParameters(5)\n");
    ntrans = 0;
-   if (!IsNULL(check_trans_file)) fclose(check_trans_file); check_trans_file = (FILE *)NULL;
+   if (!IsNULL(check_trans_file)) fclose(check_trans_file);
+   check_trans_file = (FILE *)NULL;
 // fprintf(stderr,"ClearParameters(6)\n");
-   if (!IsNULL(charge_file)) FortranClose(charge_file); charge_file = NULL;
+   if (!IsNULL(charge_file)) FortranClose(charge_file);
+   charge_file = NULL;
 // fprintf(stderr,"ClearParameters(7)\n");
    charge_file = NULL; /* file with charge increments */
    charges_read = FALSE;
@@ -992,8 +996,9 @@ void ClearParameters()
    acidity_limit = 0.0;
    remove_minor_fragments = FALSE;
    desired_charge = 0;
-   if (!IsNULL(tautomer_file)) FortranClose(tautomer_file); tautomer_file = NULL;
-   if (ntautomers != 0)
+   if (!IsNULL(tautomer_file)) FortranClose(tautomer_file);
+   tautomer_file = NULL;
+   if (ntautomers != 0) {
       for (i=0; i<ntautomers; i++)
       {
          if (!IsNULL(from_tautomer[i])) FreeMolecule(from_tautomer[i]);
@@ -1001,8 +1006,12 @@ void ClearParameters()
          if (!IsNULL(to_tautomer[i])) FreeMolecule(to_tautomer[i]);
          to_tautomer[i] = (struct reaccs_molecule_t *)NULL;
       }
+   }
    npat = 0;
-   if (!IsNULL(pattern_file)) FortranClose(pattern_file); pattern_file = NULL;
+   if (!IsNULL(pattern_file)) {
+	   FortranClose(pattern_file);
+   }
+   pattern_file = NULL;
 // fprintf(stderr,"ClearParameters(8)\n");
 // static struct reaccs_molecule_t *patterns[MAXPAT];
 // fprintf(stderr,"ClearParameters(9)\n");
@@ -1014,7 +1023,8 @@ void ClearParameters()
       }
    npat = 0;
 // fprintf(stderr,"ClearParameters(10)\n");
-   if (!IsNULL(rotate_pattern_file)) FortranClose(rotate_pattern_file); rotate_pattern_file = NULL;
+   if (!IsNULL(rotate_pattern_file)) FortranClose(rotate_pattern_file);
+   rotate_pattern_file = NULL;
    rotate_pattern_file = NULL; /* file with rotate patterns */
    // static struct reaccs_molecule_t *rotate_patterns[MAXPAT];
 // fprintf(stderr,"ClearParameters(11)\n");

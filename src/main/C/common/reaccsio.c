@@ -1434,6 +1434,43 @@ char * MolToMolStr(struct reaccs_molecule_t * mp)
  */
 {
    FILE *fp;
+   size_t bufsize;
+   char * MolStr;
+
+   if (IsNULL(mp)) return NULL;
+   bufsize = 5*80 + mp->n_atoms*80 + mp->n_bonds*80 + mp->n_props*80;
+
+   fp = fmemopen(NULL, bufsize, "w+");
+   /* File could not be created => log an error and return NULL */
+   if (IsNULL(fp))
+   {
+      sprintf(msg_buffer, "Could not open memory mapped file of size %d", bufsize);
+      AddMsgToList(msg_buffer);
+      return NULL;
+   }
+
+   PrintREACCSMolecule(fp, mp,"");
+
+   rewind(fp);
+
+   MolStr = ReadFile(fp);
+   fclose(fp);
+
+   if (MolStr == NULL)
+      AddMsgToList("PrintREACCSMolecule did return NULL");
+
+   return MolStr;
+}
+
+char * MolToMolStrOld(struct reaccs_molecule_t * mp)
+/*
+ * Convert a molecule struct to a char * MolFile
+ * the returned string should be free()ed
+ * In case of problems NULL will be returned and an ErrorMessage appended
+ * to the message list.
+ */
+{
+   FILE *fp;
    const char *tempdir;
    char *tempfile;
    int idir;

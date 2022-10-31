@@ -517,6 +517,8 @@ next_cycle:
       if (nequal == 0) continue;                                              /* resolved => no change */
       if (nrb > 2  &&  nrb-nequal > 1) continue;                              /* keep spiro/fusion centers */
       if (nbp[i].n_ligands == 3  &&  nrb == 2  &&  nrb-nequal == 1) continue; /* keep stereo centers with two ring and one non-ring ligands */
+      if (nbp[i].n_ligands >= 3  &&  nrb == 3  &&  nrb-nequal == 1) continue; /* keep stereo centers with three ring and one non-ring ligands. in-out case! */
+// fprintf(stderr,"%d: nrb=%d, nequal=%d\n", i+1, nrb, nequal);
       for (j=0; j<nbp[i].n_ligands; j++)
       {
          bp = &mp->bond_array[nbp[i].bonds[j]];
