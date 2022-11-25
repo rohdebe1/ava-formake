@@ -74,6 +74,8 @@ unsigned _ovrbuffer = 0x2000;
 
 #include "struchk.h"
 
+#define MAX_OPT  100
+
 // FILE *log_file;
 // FILE *aa_log;
 
@@ -1449,11 +1451,11 @@ break;
  */
 int InitCheckMol(char *opt)
 {
-   char *argv[100];   // up to 100 option strings
+   char *argv[MAX_OPT];   // up to MAX_OPT option strings
    char *cp;
    int argc=0;
    int flags;
-   int hasCRLF, hasQuote, wordInLine, eolFound;
+   int hasCRLF, hasQuote, wordInLine, eolFound, eosFound;
 
    dontExit = TRUE;
    if (IsNULL(opt)) return 0;
@@ -1482,25 +1484,26 @@ int InitCheckMol(char *opt)
           wordInLine++;
           for (cp = opt; cp[0] != '"'  &&  cp[0] != '\0'; cp++)
               ;
+          eosFound =  (cp[0] == '\0');
           cp[0] = '\0';
-// fprintf(stderr, "argv[%d] = '%s'\n", argc, opt);
+       // fprintf(stderr, "1) argv[%d] = '%s'\n", argc, opt);
           argv[argc++] = opt;
-          opt = cp+1;
+          if (!eosFound) opt = cp+1;
       }
-      else
+      else if (opt[0] != '\0')
       {
           wordInLine++;
           for (cp = opt; !isspace(cp[0])  &&  cp[0] != '\0'; cp++)
-          {
-              if (cp[0] == '\r' ||  cp[0] == '\n') eolFound = TRUE;
-          }
+              ;
+          eosFound =  (cp[0] == '\0');
           if (cp[0] == '\r' ||  cp[0] == '\n') eolFound = TRUE;
+
           cp[0] = '\0';
-// fprintf(stderr, "argv[%d] = '%s'\n", argc, opt);
+       // fprintf(stderr, "2) argv[%d] = '%s'\n", argc, opt);
           argv[argc++] = opt;
-          opt = cp+1;
+          if (!eosFound) opt = cp+1;
       }
-      if (wordInLine >= 2  &&  hasCRLF  &&  !eolFound)     // skip to after EOL
+      if (wordInLine == 2  &&  hasCRLF  &&  !eolFound)     // skip to after EOL
       {
           while (opt[0] != '\0'  &&  opt[0] != '\r' &&  opt[0] != '\n')
               opt++;
@@ -1512,7 +1515,7 @@ int InitCheckMol(char *opt)
       {
           wordInLine = 0;
       }
-   } while (opt[0]);
+   } while (argc < MAX_OPT && opt[0]);
    flags = Initialize((FILE *)NULL, argc, argv);
 
    return (flags);
@@ -1520,7 +1523,7 @@ int InitCheckMol(char *opt)
 
 int _InitCheckMol_(char *opt)
 {
-   char **argv;   // up to 100 option strings
+   char **argv;   // up to MAX_OPT option strings
    char *arg, *tmp;
    int i, argc;
    int flags;

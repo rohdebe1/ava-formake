@@ -44,6 +44,10 @@
 /*                                                                      */
 /************************************************************************/
 
+#ifdef _WIN32
+#include <objbase.h>
+#endif
+
 #include "reaccsio.h"
 
 #include <stdio.h>
@@ -1366,7 +1370,7 @@ struct reaccs_molecule_t *ReadReactionAgents(Fortran_FILE *fp)
 
 #define MAXLINE 300
 
-static char * ReadFile(FILE *fp)
+static char * _ReadFile(FILE *fp)
 /*
  * Read the file into a string
  * the returned string should be free()ed if not NULL
@@ -1434,12 +1438,28 @@ char * MolToMolStr(struct reaccs_molecule_t * mp)
  */
 {
    FILE *fp;
-   size_t bufsize;
    char * MolStr;
+#ifndef _WIN32
+   size_t bufsize;
+#else
+   wchar_t *tmpdir = NULL;
+   int guid_string_buf_size = 0;
+   size_t tmpfilename_buf_size = 0;
+   wchar_t *tmpfilename_buf = NULL;
+   int guid_string_len = 0;
+   int swprintf_res;
+   int remove_res;
+   const int GUID_STRING_SIZE_INCR = 64;
+   const int GUID_STRING_MAX_SIZE = GUID_STRING_SIZE_INCR * 10;
+   const wchar_t *AVATMP_PREFIX = L"avatmp_";
+   GUID guid;
+   wchar_t *guid_string = NULL;
+   HRESULT guid_res;
+#endif
 
    if (IsNULL(mp)) return NULL;
+#ifndef _WIN32
    bufsize = 5*80 + mp->n_atoms*80 + mp->n_bonds*80 + mp->n_props*80;
-
    fp = fmemopen(NULL, bufsize, "w+");
    /* File could not be created => log an error and return NULL */
    if (IsNULL(fp))
@@ -1448,13 +1468,82 @@ char * MolToMolStr(struct reaccs_molecule_t * mp)
       AddMsgToList(msg_buffer);
       return NULL;
    }
-
+#else
+   tmpdir = _wgetenv(L"TMP");
+   if (!tmpdir)
+   {
+      AddMsgToList("Could not retrieve TMP environment variable");
+      return NULL;
+   }
+   guid_res = CoCreateGuid(&guid);
+   if (guid_res != S_OK)
+   {
+      sprintf(msg_buffer, "Could not create tempfile GUID; error code: %d", guid_res);
+      AddMsgToList(msg_buffer);
+      return NULL;
+   }
+   while (guid_string_buf_size < GUID_STRING_MAX_SIZE
+      && !(guid_string_len = StringFromGUID2(&guid, guid_string, guid_string_buf_size)))
+   {
+      guid_string_buf_size += GUID_STRING_SIZE_INCR;
+      guid_string = (wchar_t *)realloc(guid_string, guid_string_buf_size * sizeof(wchar_t));
+      if (!guid_string)
+      {
+         AddMsgToList("Could not allocate guid_string");
+         return NULL;
+      }
+   }
+   if (!guid_string_len)
+   {
+      AddMsgToList("Could not convert GUID to string");
+      return NULL;
+   }
+   tmpfilename_buf_size = guid_string_len + wcslen(tmpdir) + wcslen(AVATMP_PREFIX) + 1;
+   tmpfilename_buf = (wchar_t *)malloc((tmpfilename_buf_size + 2) * sizeof(wchar_t));
+   if (!tmpfilename_buf)
+   {
+      free(guid_string);
+      guid_string = NULL;
+      AddMsgToList("Could not allocate tmpfilename_buf");
+      return NULL;
+   }
+   swprintf_res = swprintf_s(tmpfilename_buf, tmpfilename_buf_size, L"%s\\%s%s", tmpdir, AVATMP_PREFIX, guid_string);
+   free(guid_string);
+   guid_string = NULL;
+   if (swprintf_res == -1)
+   {
+      free(tmpfilename_buf);
+      tmpfilename_buf = NULL;
+      AddMsgToList("Could not create temporary filename");
+      return NULL;
+   }
+   fp = _wfopen(tmpfilename_buf, L"w+");
+   /* File could not be created => log an error and return NULL */
+   if (IsNULL(fp))
+   {
+      free(tmpfilename_buf);
+      tmpfilename_buf = NULL;
+      AddMsgToList("Could not open temporary file");
+      return NULL;
+   }
+#endif
    PrintREACCSMolecule(fp, mp,"");
 
    rewind(fp);
 
-   MolStr = ReadFile(fp);
+   MolStr = _ReadFile(fp);
    fclose(fp);
+
+#ifdef _WIN32
+   remove_res = _wremove(tmpfilename_buf);
+   free(tmpfilename_buf);
+   tmpfilename_buf = NULL;
+   if (remove_res == -1)
+   {
+      AddMsgToList("Could not delete temporary file");
+      return NULL;
+   }
+#endif
 
    if (MolStr == NULL)
       AddMsgToList("PrintREACCSMolecule did return NULL");
@@ -1490,7 +1579,7 @@ char * MolToMolStrOld(struct reaccs_molecule_t * mp)
 
    rewind(fp);
 
-   MolStr = ReadFile(fp);
+   MolStr = _ReadFile(fp);
    fclose(fp);
    if (!IsNULL(tempfile))   // tmpfile() did work => remove the file after use
    {

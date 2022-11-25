@@ -1166,8 +1166,8 @@ char *CanSmiles(char *insmiles, int flags)
 {
    char *smiles, *tmp;
 
-if (insmiles)
-// fprintf(stderr, "CanSmiles: insmiles = '%s'\n\n", insmiles);
+   if (insmiles == NULL) return (NULL);
+   // fprintf(stderr, "CanSmiles: insmiles = '%s'\n\n", insmiles);
    smiles = CanSmilesStep(insmiles, flags);
    if (smiles == NULL) return (NULL);
 // fprintf(stderr, "CanSmiles: smiles = '%s'\n\n", smiles);

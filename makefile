@@ -9,6 +9,7 @@ LD_OPTS := -fPIC -lm -fno-exceptions
 ifeq ($(OS),Windows_NT)     # is Windows_NT on XP, 2000, 7, Vista, 10...
 	# Windows flavor of operating systems
     FixPath = $(subst /,\,$1)	# replace slashes by backslashes. Might not be needed.
+    LD_OPTS += -lole32
     DETECTED_OS := Windows
     # If path to javah is non-empty then it's safe to use it
 	ifneq ($(realpath ${JAVA_HOME}/bin/javah.exe),) 
