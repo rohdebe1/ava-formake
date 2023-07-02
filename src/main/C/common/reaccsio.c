@@ -1379,6 +1379,7 @@ static char * _ReadFile(FILE *fp)
    char * Buf;
    char Line[MAXLINE+1];
    int  Size;
+   int  Len;
 
    Buf = (char *)malloc(1);
    Size = 1;
@@ -1392,7 +1393,9 @@ static char * _ReadFile(FILE *fp)
 
    while (fgets(Line,MAXLINE,fp) != NULL)
    {
-      Size += strlen(Line);
+      Len = strlen(Line);
+      if (!Len) break;
+      Size += Len;
       Buf = (char *)realloc(Buf,Size);
       if (Buf == NULL)
       {
@@ -1459,7 +1462,7 @@ char * MolToMolStr(struct reaccs_molecule_t * mp)
 
    if (IsNULL(mp)) return NULL;
 #ifndef _WIN32
-   bufsize = 5*80 + mp->n_atoms*80 + mp->n_bonds*80 + mp->n_props*80;
+   bufsize = 5*80 + mp->n_atoms*80 + mp->n_bonds*80 + mp->n_props*80 + 1;
    fp = fmemopen(NULL, bufsize, "w+");
    /* File could not be created => log an error and return NULL */
    if (IsNULL(fp))
@@ -1529,6 +1532,8 @@ char * MolToMolStr(struct reaccs_molecule_t * mp)
 #endif
    PrintREACCSMolecule(fp, mp,"");
 
+   fputc('\0', fp);
+   fflush(fp);
    rewind(fp);
 
    MolStr = _ReadFile(fp);
@@ -1577,6 +1582,8 @@ char * MolToMolStrOld(struct reaccs_molecule_t * mp)
 
    PrintREACCSMolecule(fp, mp,"");
 
+   fputc('\0', fp);
+   fflush(fp);
    rewind(fp);
 
    MolStr = _ReadFile(fp);
