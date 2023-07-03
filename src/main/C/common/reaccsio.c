@@ -322,34 +322,49 @@ void PrintREACCSAtom(FILE *fp,
       fprintf(fp,"\n");
 }
 
+#define MAX_BONDLINE_FIELDS 7
+#define BONDLINE_FIELD_LEN 3
+
 int ReadREACCSBond(Fortran_FILE *fp, struct reaccs_bond_t *bp)
 {
-   int nitems, i;
-   char buffer[MAX_BUFFER+1];
+   int nitems, i, j, k;
+   int bond_line_len, n_chars, pos;
+   int *ptrarray[MAX_BONDLINE_FIELDS];
+   char c;
+   char buffer[BONDLINE_FIELD_LEN+1];
 
    if (fp->status != FORTRAN_NORMAL) return(fp->status);
-
-   strncpy(buffer,fp->buffer,MAX_BUFFER);
-   /* zero pad only atom numbers! */
-   for (i=0; i<6; i++) if (buffer[i] == ' ') buffer[i] = '0';
 
    bp->stereo_symbol = 0;
    bp->dummy = 0;
    bp->topography = 0;
    bp->reaction_mark = NONE;
-   // make sure spaces are interpreted the Fortran-way
-   for (i=9; i<strlen(buffer)  &&  i<21; i+=3)
+   ptrarray[0] = &bp->atoms[0];
+   ptrarray[1] = &bp->atoms[1];
+   ptrarray[2] = &bp->bond_type;
+   ptrarray[3] = &bp->stereo_symbol;
+   ptrarray[4] = &bp->dummy;
+   ptrarray[5] = &bp->topography;
+   ptrarray[6] = &bp->reaction_mark;
+   bond_line_len = strlen(fp->buffer);
+   nitems = bond_line_len ? (bond_line_len - 1) / BONDLINE_FIELD_LEN + 1 : 0;
+   if (nitems > MAX_BONDLINE_FIELDS)
+      nitems = MAX_BONDLINE_FIELDS;
+   for (i = 0; i < nitems; ++i)
    {
-       if ((i+1)<strlen(buffer)  &&  buffer[i+1]==' ') buffer[i+1] = '0';
-       if ((i+2)<strlen(buffer)  &&  buffer[i+2]==' ') buffer[i+2] = '0';
+      pos = i * BONDLINE_FIELD_LEN;
+      memset(buffer, 0, BONDLINE_FIELD_LEN + 1);
+      n_chars = bond_line_len - pos;
+      if (n_chars > BONDLINE_FIELD_LEN)
+         n_chars = BONDLINE_FIELD_LEN;
+      for (j = 0, k = 0; j < n_chars; ++j)
+      {
+         c = fp->buffer[pos + j];
+         if (c != ' ')
+            buffer[k++] = c;
+      }
+      sscanf(buffer, "%3d", ptrarray[i]);
    }
-   nitems = sscanf(buffer,
-                   "%3d%3d%3d%3d%3d%3d%3d",
-                   &bp->atoms[0],   &bp->atoms[1],
-                   &bp->bond_type,  &bp->stereo_symbol,
-                   &bp->dummy,
-                   &bp->topography, &bp->reaction_mark);
-
    if (nitems >= 3)
    {
       GetBuffer(fp);
